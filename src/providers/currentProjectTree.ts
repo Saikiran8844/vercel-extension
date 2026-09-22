@@ -32,17 +32,29 @@ export class CurrentProjectTreeDataProvider implements vscode.TreeDataProvider<V
 
     const config = this.getProjectConfig();
     if (!config) {
-      const item: VercelTreeItem = new vscode.TreeItem(
+      const linkItem: VercelTreeItem = new vscode.TreeItem(
         'Workspace not linked to Vercel',
         vscode.TreeItemCollapsibleState.None
       ) as VercelTreeItem;
-      item.contextValue = 'action';
-      item.iconPath = new vscode.ThemeIcon('cloud-upload');
-      item.command = {
+      linkItem.contextValue = 'action';
+      linkItem.iconPath = new vscode.ThemeIcon('cloud-upload');
+      linkItem.command = {
         command: 'vercel.linkProject',
         title: 'Link Project'
       };
-      return [item];
+
+      const dashItem: VercelTreeItem = new vscode.TreeItem(
+        'Open Control Center Dashboard',
+        vscode.TreeItemCollapsibleState.None
+      ) as VercelTreeItem;
+      dashItem.contextValue = 'action';
+      dashItem.iconPath = new vscode.ThemeIcon('dashboard');
+      dashItem.command = {
+        command: 'vercel.openDashboardPanel',
+        title: 'Open Control Center Dashboard'
+      };
+
+      return [dashItem, linkItem];
     }
 
     try {
@@ -61,6 +73,19 @@ export class CurrentProjectTreeDataProvider implements vscode.TreeDataProvider<V
     }
 
     const items: VercelTreeItem[] = [];
+
+    // Open Interactive Dashboard
+    const dashItem: VercelTreeItem = new vscode.TreeItem(
+      'Open Control Center Dashboard',
+      vscode.TreeItemCollapsibleState.None
+    ) as VercelTreeItem;
+    dashItem.contextValue = 'action';
+    dashItem.iconPath = new vscode.ThemeIcon('dashboard');
+    dashItem.command = {
+      command: 'vercel.openDashboardPanel',
+      title: 'Open Control Center Dashboard'
+    };
+    items.push(dashItem);
 
     // Project Name & Dashboard
     const nameItem: VercelTreeItem = new vscode.TreeItem(
