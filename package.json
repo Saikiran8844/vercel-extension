@@ -1,0 +1,408 @@
+{
+  "name": "vercel-control-center",
+  "displayName": "Vercel Console",
+  "description": "Production-quality Vercel management, deployment, logs, environment variables, observability, and diagnostics directly inside VS Code.",
+  "version": "1.0.1",
+  "publisher": "saikiran-n",
+  "private": true,
+  "engines": {
+    "vscode": "^1.115.0"
+  },
+  "categories": [
+    "Other",
+    "Azure",
+    "Testing"
+  ],
+  "keywords": [
+    "vercel",
+    "nextjs",
+    "deployment",
+    "serverless",
+    "observability",
+    "waf",
+    "devops"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vercel-control-center",
+          "title": "Vercel",
+          "icon": "$(cloud)"
+        }
+      ]
+    },
+    "views": {
+      "vercel-control-center": [
+        {
+          "id": "vercel.currentProject",
+          "name": "Current Project",
+          "contextualTitle": "Vercel: Current Project"
+        },
+        {
+          "id": "vercel.deployments",
+          "name": "Deployments",
+          "contextualTitle": "Vercel: Deployments"
+        },
+        {
+          "id": "vercel.environments",
+          "name": "Environment Variables",
+          "contextualTitle": "Vercel: Environments"
+        },
+        {
+          "id": "vercel.domains",
+          "name": "Domains & DNS",
+          "contextualTitle": "Vercel: Domains"
+        },
+        {
+          "id": "vercel.projects",
+          "name": "All Projects",
+          "contextualTitle": "Vercel: Projects"
+        },
+        {
+          "id": "vercel.teams",
+          "name": "Teams & Accounts",
+          "contextualTitle": "Vercel: Teams"
+        },
+        {
+          "id": "vercel.platformServices",
+          "name": "Platform & Security",
+          "contextualTitle": "Vercel: Platform"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vercel.openDashboardPanel",
+        "title": "Vercel: Open Control Center Dashboard",
+        "category": "Vercel",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "vercel.login",
+        "title": "Vercel: Login",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.logout",
+        "title": "Vercel: Logout",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.switchAccount",
+        "title": "Vercel: Switch Team / Scope",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.validateAuth",
+        "title": "Vercel: Validate Authentication",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.linkProject",
+        "title": "Vercel: Link Project",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.unlinkProject",
+        "title": "Vercel: Unlink Project",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.createProject",
+        "title": "Vercel: Create Project",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.openProject",
+        "title": "Vercel: Open Project in Dashboard",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.openProduction",
+        "title": "Vercel: Open Production Deployment",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.deploy",
+        "title": "Vercel: Deploy",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.deployPreview",
+        "title": "Vercel: Deploy Preview",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.deployProd",
+        "title": "Vercel: Deploy Production",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.deployDryRun",
+        "title": "Vercel: Deploy Dry Run (Inspect Files)",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.redeploy",
+        "title": "Vercel: Redeploy",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.rollback",
+        "title": "Vercel: Rollback Production",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.cancelDeployment",
+        "title": "Vercel: Cancel Deployment",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.inspectDeployment",
+        "title": "Vercel: Inspect Deployment",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.viewBuildLogs",
+        "title": "Vercel: View Build Logs",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.viewRuntimeLogs",
+        "title": "Vercel: View Runtime Logs",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.streamLogs",
+        "title": "Vercel: Stream Logs",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.pullEnv",
+        "title": "Vercel: Pull Environment Variables",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.pushEnv",
+        "title": "Vercel: Push Environment Variables",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.compareEnv",
+        "title": "Vercel: Compare Environments",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.addEnv",
+        "title": "Vercel: Add Environment Variable",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.manageDomains",
+        "title": "Vercel: Manage Domains",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.verifyDomain",
+        "title": "Vercel: Verify Domain",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.diagnoseDns",
+        "title": "Vercel: Diagnose DNS",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.diagnoseDeployment",
+        "title": "Vercel: Diagnose Deployment",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.diagnoseProject",
+        "title": "Vercel: Diagnose Project",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.detectDrift",
+        "title": "Vercel: Detect Configuration Drift",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.openDashboard",
+        "title": "Vercel: Open Dashboard",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.refresh",
+        "title": "Vercel: Refresh",
+        "category": "Vercel",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "vercel.featureSupport",
+        "title": "Vercel: Feature Support",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.aiAssistant",
+        "title": "Vercel: Assistant (AI Diagnoser)",
+        "category": "Vercel"
+      },
+      {
+        "command": "vercel.investigateError",
+        "title": "Vercel: Investigate Error in Code",
+        "category": "Vercel"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "vercel.openDashboardPanel",
+          "when": "view =~ /^vercel\\./",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vercel.refresh",
+          "when": "view =~ /^vercel\\./",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "vercel.openDashboardPanel"
+        },
+        {
+          "command": "vercel.login"
+        },
+        {
+          "command": "vercel.logout"
+        },
+        {
+          "command": "vercel.switchAccount"
+        },
+        {
+          "command": "vercel.deploy"
+        },
+        {
+          "command": "vercel.deployPreview"
+        },
+        {
+          "command": "vercel.deployProd"
+        },
+        {
+          "command": "vercel.redeploy"
+        },
+        {
+          "command": "vercel.rollback"
+        },
+        {
+          "command": "vercel.pullEnv"
+        },
+        {
+          "command": "vercel.pushEnv"
+        },
+        {
+          "command": "vercel.compareEnv"
+        },
+        {
+          "command": "vercel.diagnoseDeployment"
+        },
+        {
+          "command": "vercel.detectDrift"
+        },
+        {
+          "command": "vercel.featureSupport"
+        },
+        {
+          "command": "vercel.aiAssistant"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Vercel Control Center",
+      "properties": {
+        "vercel.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh deployment and project status periodically."
+        },
+        "vercel.refreshInterval": {
+          "type": "number",
+          "default": 30,
+          "description": "Auto-refresh interval in seconds (minimum 10s)."
+        },
+        "vercel.showNotifications": {
+          "type": "string",
+          "enum": [
+            "all",
+            "important",
+            "none"
+          ],
+          "default": "important",
+          "description": "Notification verbosity for deployments, build events, and domain verifications."
+        },
+        "vercel.logLevel": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "default": "info",
+          "description": "Logging level for Vercel Control Center output channel."
+        },
+        "vercel.ai.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI assistance for log diagnosis and error explanations."
+        },
+        "vercel.ai.provider": {
+          "type": "string",
+          "enum": [
+            "gemini",
+            "openai",
+            "anthropic"
+          ],
+          "default": "gemini",
+          "description": "AI provider used for error explanation and diagnosis."
+        },
+        "vercel.dashboardUrl": {
+          "type": "string",
+          "default": "https://vercel.com",
+          "description": "Base URL for the Vercel Dashboard."
+        },
+        "vercel.enableTelemetry": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow anonymous extension performance telemetry (respects VS Code global telemetry settings)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "watch:build": "node esbuild.js --watch",
+    "build": "node esbuild.js --production",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/vscode": "^1.138.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}
