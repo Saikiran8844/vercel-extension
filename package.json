@@ -1,12 +1,16 @@
 {
-  "name": "vercel-control-center",
+  "name": "vercel",
   "displayName": "Vercel Console",
   "description": "Production-quality Vercel management, deployment, logs, environment variables, observability, and diagnostics directly inside VS Code.",
   "version": "1.0.1",
   "publisher": "saikiran-n",
-  "private": true,
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Saikiran8844/vercel-extension"
+  },
   "engines": {
-    "vscode": "^1.115.0"
+    "vscode": "^1.138.0"
   },
   "categories": [
     "Other",
@@ -32,7 +36,7 @@
         {
           "id": "vercel-control-center",
           "title": "Vercel",
-          "icon": "$(cloud)"
+          "icon": "media/vercel-activitybar.svg"
         }
       ]
     },

@@ -671,6 +671,15 @@ export class DashboardPanel {
     }
   }
 
+  private getNonce(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < 32; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  }
+
   private escapeHtml(str: unknown): string {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -689,13 +698,14 @@ export class DashboardPanel {
     const frameworkName = initialConfig?.framework || 'Custom';
     const projId = initialConfig?.projectId || '-';
     const rootPath = initialConfig?.rootPath || '-';
+    const nonce = this.getNonce();
     const serializedInitial = JSON.stringify(initialState || null).replace(/</g, '\\u003c');
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data: ${this.panel.webview.cspSource}; style-src ${this.panel.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'unsafe-eval';">
   <title>Vercel Control Center</title>
   <style>
     :root {
@@ -1367,7 +1377,7 @@ export class DashboardPanel {
       
       <!-- Project Switcher in Breadcrumbs -->
       <div class="project-switcher" id="projectSwitcher">
-        <button class="project-switcher-btn" id="projectSwitcherBtn" onclick="toggleProjectMenu(event)" title="Switch Project">
+        <button class="project-switcher-btn" id="projectSwitcherBtn" data-action="toggle-project-menu" title="Switch Project">
           <span id="headerProject">${isLinked ? projName : 'Control Center'}</span>
           <svg style="margin-left: 4px;" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1377,7 +1387,7 @@ export class DashboardPanel {
             <!-- Dynamic items -->
           </div>
           <div class="dropdown-divider"></div>
-          <button class="dropdown-item dropdown-action" onclick="openCreateProjectModal()">
+          <button class="dropdown-item dropdown-action" data-action="open-create-project">
             <span>+ Import New Project from Git</span>
           </button>
         </div>
@@ -1385,11 +1395,11 @@ export class DashboardPanel {
     </div>
 
     <div class="top-actions" id="topActions" style="${isLinked ? 'display: flex;' : 'display: none;'}">
-      <select id="teamSelector" class="team-select" onchange="handleTeamChange(this.value)">
+      <select id="teamSelector" class="team-select">
         <option value="">Personal Account</option>
       </select>
-      <button class="btn btn-secondary btn-sm" onclick="sendAction('refresh')">↻ Refresh</button>
-      <button class="btn btn-secondary btn-sm" onclick="sendAction('logout')">Log Out</button>
+      <button class="btn btn-secondary btn-sm" data-action="refresh">↻ Refresh</button>
+      <button class="btn btn-secondary btn-sm" data-action="logout">Log Out</button>
     </div>
   </div>
 
@@ -1401,8 +1411,8 @@ export class DashboardPanel {
         <div class="pulse-dot building" style="width: 14px; height: 14px;"></div>
         <div style="color: var(--text-muted); font-size: 13px; font-weight: 500;">Connecting to Vercel...</div>
         <div id="loadingFallbackActions" style="margin-top: 14px; display: flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="sendAction('ready')">↻ Retry Connecting</button>
-          <button class="btn btn-secondary btn-sm" onclick="forceShowDashboard()">Show Dashboard →</button>
+          <button class="btn btn-secondary btn-sm" data-action="ready">↻ Retry Connecting</button>
+          <button class="btn btn-secondary btn-sm" data-action="force-dashboard">Show Dashboard →</button>
         </div>
       </div>
     </div>
@@ -1414,8 +1424,8 @@ export class DashboardPanel {
         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Unable to load Vercel project</h3>
         <p id="errorMessage" style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 24px;"></p>
         <div style="display: flex; justify-content: center; gap: 10px;">
-          <button class="btn btn-secondary" onclick="sendAction('refresh')">↻ Retry</button>
-          <button class="btn btn-secondary" onclick="sendAction('logout')">Log Out</button>
+          <button class="btn btn-secondary" data-action="refresh">↻ Retry</button>
+          <button class="btn btn-secondary" data-action="logout">Log Out</button>
         </div>
       </div>
     </div>
@@ -1437,8 +1447,8 @@ export class DashboardPanel {
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button class="btn btn-primary" style="flex: 1;" onclick="handleLogin()">Connect Account</button>
-          <button class="btn btn-secondary" onclick="openExternal('https://vercel.com/account/tokens')">Get Token ↗</button>
+          <button class="btn btn-primary" style="flex: 1;" data-action="login">Connect Account</button>
+          <button class="btn btn-secondary" data-action="get-token">Get Token ↗</button>
         </div>
       </div>
     </div>
@@ -1449,8 +1459,8 @@ export class DashboardPanel {
         <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Workspace is not linked</h2>
         <p style="color: var(--text-muted); margin-bottom: 24px;">Link this local workspace to an existing Vercel project or import a new repository from Git.</p>
         <div style="display: flex; justify-content: center; gap: 10px;">
-          <button class="btn btn-primary" onclick="openCreateProjectModal()">+ Import Project from Git</button>
-          <button class="btn btn-secondary" onclick="sendAction('openTerminalLink')">⚡ Run "vercel link" in Terminal</button>
+          <button class="btn btn-primary" data-action="open-create-project">+ Import Project from Git</button>
+          <button class="btn btn-secondary" data-action="open-terminal-link">⚡ Run "vercel link" in Terminal</button>
         </div>
       </div>
 
@@ -1460,7 +1470,7 @@ export class DashboardPanel {
           <span style="font-size: 12px; color: var(--text-muted);" id="projectCountLabel">0 projects</span>
         </div>
         <div class="search-box">
-          <input type="text" id="projectSearchInput" class="input-field" placeholder="Search projects by name..." oninput="filterProjects(this.value)" />
+          <input type="text" id="projectSearchInput" class="input-field" placeholder="Search projects by name..." />
         </div>
         <div class="project-grid" id="projectGrid">
           <!-- Dynamically populated -->
@@ -1483,20 +1493,20 @@ export class DashboardPanel {
           </div>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="toggleProjectMenu(event)">Switch Project ▾</button>
-          <button class="btn btn-secondary btn-sm" onclick="openCreateProjectModal()">+ Add from Git</button>
-          <button class="btn btn-secondary btn-sm" onclick="sendAction('deploy', { target: 'preview' })">Deploy Preview</button>
-          <button class="btn btn-primary btn-sm" onclick="sendAction('deploy', { target: 'production' })">▲ Deploy Production</button>
+          <button class="btn btn-secondary btn-sm" data-action="toggle-project-menu">Switch Project ▾</button>
+          <button class="btn btn-secondary btn-sm" data-action="open-create-project">+ Add from Git</button>
+          <button class="btn btn-secondary btn-sm" data-action="deploy-preview">Deploy Preview</button>
+          <button class="btn btn-primary btn-sm" data-action="deploy-production">▲ Deploy Production</button>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="tabs-bar">
-        <div class="tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
-        <div class="tab" data-tab="deployments" onclick="switchTab('deployments')">Deployments</div>
-        <div class="tab" data-tab="environment" onclick="switchTab('environment')">Environment Variables</div>
-        <div class="tab" data-tab="domains" onclick="switchTab('domains')">Domains & DNS</div>
-        <div class="tab" data-tab="diagnostics" onclick="switchTab('diagnostics')">AI Diagnostics</div>
+        <div class="tab active" data-tab="overview">Overview</div>
+        <div class="tab" data-tab="deployments">Deployments</div>
+        <div class="tab" data-tab="environment">Environment Variables</div>
+        <div class="tab" data-tab="domains">Domains & DNS</div>
+        <div class="tab" data-tab="diagnostics">AI Diagnostics</div>
       </div>
 
       <!-- Tab: Overview -->
@@ -1509,11 +1519,11 @@ export class DashboardPanel {
               <span id="prodStateText">Production</span>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary btn-sm" onclick="sendAction('deploy', { target: 'production' })">▲ Deploy to Prod</button>
-              <button class="btn btn-secondary btn-sm" onclick="sendAction('deploy', { target: 'preview' })">Deploy Preview</button>
+              <button class="btn btn-secondary btn-sm" data-action="deploy-production">▲ Deploy to Prod</button>
+              <button class="btn btn-secondary btn-sm" data-action="deploy-preview">Deploy Preview</button>
             </div>
           </div>
-          <a href="#" id="prodLink" class="prod-url" target="_blank" onclick="handleProdClick(event)">app-vercel.app ↗</a>
+          <a href="#" id="prodLink" class="prod-url" target="_blank" data-action="open-prod-url">app-vercel.app ↗</a>
           <div class="prod-meta">
             <div class="meta-item"><span>Branch:</span> <b id="prodBranch">main</b></div>
             <div class="meta-item"><span>Commit:</span> <span id="prodCommit" style="font-family: var(--font-mono);">-</span></div>
@@ -1526,8 +1536,8 @@ export class DashboardPanel {
           <div class="card-title">
             <span>Project Details</span>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary btn-sm" onclick="toggleProjectMenu(event)">Switch Project</button>
-              <button class="btn btn-danger btn-sm" onclick="sendAction('unlinkProject')">Unlink Project</button>
+              <button class="btn btn-secondary btn-sm" data-action="toggle-project-menu">Switch Project</button>
+              <button class="btn btn-danger btn-sm" data-action="unlink-project">Unlink Project</button>
             </div>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -1556,7 +1566,7 @@ export class DashboardPanel {
         <div class="card">
           <div class="card-title">
             <span>Recent Deployments</span>
-            <button class="btn btn-primary btn-sm" onclick="sendAction('deploy', { target: 'preview' })">+ New Deployment</button>
+            <button class="btn btn-primary btn-sm" data-action="deploy-preview">+ New Deployment</button>
           </div>
           <div class="table-container">
             <table>
@@ -1584,13 +1594,13 @@ export class DashboardPanel {
           <div class="card-title">
             <span>Environment Variables</span>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary btn-sm" onclick="sendAction('addEnvCli')">⚡ Add via CLI (vercel env add)</button>
-              <button class="btn btn-secondary btn-sm" onclick="sendAction('pullEnv')">⬇ Pull to .env.local</button>
-              <button class="btn btn-primary btn-sm" onclick="openAddEnvModal()">+ Add Variable</button>
+              <button class="btn btn-secondary btn-sm" data-action="add-env-cli">⚡ Add via CLI (vercel env add)</button>
+              <button class="btn btn-secondary btn-sm" data-action="pull-env">⬇ Pull to .env.local</button>
+              <button class="btn btn-primary btn-sm" data-action="open-add-env">+ Add Variable</button>
             </div>
           </div>
           <div class="search-box">
-            <input type="text" id="envSearchInput" class="input-field" placeholder="Filter variables by key..." oninput="filterEnvVars(this.value)" />
+            <input type="text" id="envSearchInput" class="input-field" placeholder="Filter variables by key..." />
           </div>
           <div class="table-container">
             <table>
@@ -1616,7 +1626,7 @@ export class DashboardPanel {
         <div class="card">
           <div class="card-title">
             <span>Project Custom Domains</span>
-            <button class="btn btn-primary btn-sm" onclick="openAddDomainModal()">+ Add Custom Domain</button>
+            <button class="btn btn-primary btn-sm" data-action="open-add-domain">+ Add Custom Domain</button>
           </div>
           <div class="table-container">
             <table>
@@ -1663,7 +1673,7 @@ export class DashboardPanel {
         <div class="card">
           <div class="card-title">
             <span>Smart Configuration & Health Diagnostics</span>
-            <button class="btn btn-primary btn-sm" onclick="sendAction('runDiagnostics')">⚡ Run Deep Diagnosis</button>
+            <button class="btn btn-primary btn-sm" data-action="run-diagnostics">⚡ Run Deep Diagnosis</button>
           </div>
           <div id="diagnosticsList">
             <p style="color: var(--text-muted);">Click "Run Deep Diagnosis" to scan for build misconfigurations, drift, and environment issues.</p>
@@ -1702,8 +1712,8 @@ export class DashboardPanel {
         </div>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
-        <button class="btn btn-secondary" onclick="closeAddEnvModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitNewEnv()">Save Variable</button>
+        <button class="btn btn-secondary" data-action="close-env-modal">Cancel</button>
+        <button class="btn btn-primary" data-action="submit-new-env">Save Variable</button>
       </div>
     </div>
   </div>
@@ -1721,9 +1731,9 @@ export class DashboardPanel {
         Environment variable <b id="promptEnvKey" style="color: #fff; font-family: var(--font-mono);"></b> was added. To apply these values to your deployment runtime, a new deployment is required.
       </p>
       <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn btn-secondary" onclick="closeDeployPrompt()">Later</button>
-        <button class="btn btn-secondary" onclick="triggerDeployFromPrompt('preview')">Deploy Preview</button>
-        <button class="btn btn-primary" onclick="triggerDeployFromPrompt('production')">▲ Deploy Production</button>
+        <button class="btn btn-secondary" data-action="close-deploy-prompt">Later</button>
+        <button class="btn btn-secondary" data-action="prompt-deploy-preview">Deploy Preview</button>
+        <button class="btn btn-primary" data-action="prompt-deploy-prod">▲ Deploy Production</button>
       </div>
     </div>
   </div>
@@ -1736,14 +1746,14 @@ export class DashboardPanel {
           <span style="font-size: 16px;">▲</span>
           <h3 style="font-size: 16px; font-weight: 600;">Import Git Repository</h3>
         </div>
-        <button class="btn btn-secondary btn-sm" onclick="closeCreateProjectModal()">✕</button>
+        <button class="btn btn-secondary btn-sm" data-action="close-create-modal">✕</button>
       </div>
       <p style="color: var(--text-muted); font-size: 12px; line-height: 1.5; margin-bottom: 20px;">
         Deploy a new project to your Vercel account with minimal setup.
       </p>
       <div class="input-group">
         <label class="input-label" for="newProjRepo">Git Repository (GitHub / GitLab / Bitbucket)</label>
-        <input type="text" id="newProjRepo" class="input-field" placeholder="e.g. vercel/next.js or https://github.com/owner/repo" oninput="handleRepoInput(this.value)" />
+        <input type="text" id="newProjRepo" class="input-field" placeholder="e.g. vercel/next.js or https://github.com/owner/repo" />
       </div>
       <div class="input-group">
         <label class="input-label" for="newProjName">Project Name</label>
@@ -1764,8 +1774,8 @@ export class DashboardPanel {
         </select>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px;">
-        <button class="btn btn-secondary" onclick="closeCreateProjectModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitCreateProject()">Import and Deploy</button>
+        <button class="btn btn-secondary" data-action="close-create-modal">Cancel</button>
+        <button class="btn btn-primary" data-action="submit-create-project">Import and Deploy</button>
       </div>
     </div>
   </div>
@@ -1783,16 +1793,27 @@ export class DashboardPanel {
         <input type="text" id="newDomainRedirect" class="input-field" placeholder="Leave empty unless redirecting" />
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
-        <button class="btn btn-secondary" onclick="closeAddDomainModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitNewDomain()">Add Domain</button>
+        <button class="btn btn-secondary" data-action="close-domain-modal">Cancel</button>
+        <button class="btn btn-primary" data-action="submit-new-domain">Add Domain</button>
       </div>
     </div>
   </div>
 
-  <script id="initialStateData" type="application/json">${serializedInitial}</script>
+  <script id="initialStateData" type="application/json" nonce="${nonce}">${serializedInitial}</script>
 
-  <script>
-    const vscode = acquireVsCodeApi();
+  <script nonce="${nonce}">
+    let vscode;
+    try {
+      vscode = acquireVsCodeApi();
+    } catch (e) {
+      vscode = window.vscode || {
+        postMessage: function(msg) {
+          console.log('postMessage fallback:', msg);
+        }
+      };
+    }
+    window.vscode = vscode;
+
     let currentState = null;
     let allAvailableProjects = [];
     let allEnvVariables = [];
@@ -1808,7 +1829,23 @@ export class DashboardPanel {
     }
     window.escapeHtml = escapeHtml;
 
-    // 1. Instant Tab Switching - Available immediately on parse
+    function sendAction(type, payload) {
+      if (vscode && vscode.postMessage) {
+        vscode.postMessage({ type: type, payload: payload || {} });
+      }
+    }
+    window.sendAction = sendAction;
+
+    function openExternal(url) {
+      if (!url) return;
+      var clean = String(url).trim();
+      if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+        clean = 'https://' + clean;
+      }
+      sendAction('openUrl', { url: clean });
+    }
+    window.openExternal = openExternal;
+
     function switchTab(tabName) {
       if (!tabName) return;
       var cleanTab = tabName.toLowerCase().replace(/^tab/, '');
@@ -1834,43 +1871,25 @@ export class DashboardPanel {
     }
     window.switchTab = switchTab;
 
-    // Bind click listeners to all tab buttons programmatically
-    function bindTabButtons() {
-      document.querySelectorAll('.tab').forEach(function(tab) {
-        tab.addEventListener('click', function() {
-          var dt = tab.getAttribute('data-tab');
-          if (dt) switchTab(dt);
-        });
-      });
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bindTabButtons);
-    } else {
-      bindTabButtons();
-    }
-
-    function sendAction(type, payload) {
-      vscode.postMessage({ type: type, payload: payload || {} });
-    }
-    window.sendAction = sendAction;
-
-    function openExternal(url) {
-      if (url) sendAction('openUrl', { url: url });
-    }
-    window.openExternal = openExternal;
-
-    function handleProdClick(e) {
-      if (e) e.preventDefault();
+    function handleProdClick() {
       var prodLink = document.getElementById('prodLink');
-      var url = prodLink && (prodLink.dataset.url || prodLink.getAttribute('data-url'));
-      if (url) openExternal(url);
+      var url = prodLink && (prodLink.dataset.url || prodLink.getAttribute('data-url') || prodLink.getAttribute('href'));
+      if (url && url !== '#') {
+        openExternal(url);
+      }
     }
     window.handleProdClick = handleProdClick;
 
     function handleLogin() {
       const tokenInput = document.getElementById('tokenInput');
       const token = tokenInput ? tokenInput.value.trim() : '';
-      if (!token) return;
+      if (!token) {
+        if (tokenInput) {
+          tokenInput.style.borderColor = '#ef4444';
+          tokenInput.focus();
+        }
+        return;
+      }
       sendAction('login', { token: token });
     }
     window.handleLogin = handleLogin;
@@ -1880,29 +1899,26 @@ export class DashboardPanel {
     }
     window.handleTeamChange = handleTeamChange;
 
-    function toggleProjectMenu(e) {
-      if (e) e.stopPropagation();
+    function toggleProjectMenu() {
       const menu = document.getElementById('projectDropdownMenu');
-      if (menu) menu.classList.toggle('active');
+      if (menu) {
+        menu.classList.toggle('active');
+      }
     }
     window.toggleProjectMenu = toggleProjectMenu;
 
     function closeProjectMenu() {
       const menu = document.getElementById('projectDropdownMenu');
-      if (menu) menu.classList.remove('active');
+      if (menu) {
+        menu.classList.remove('active');
+      }
     }
     window.closeProjectMenu = closeProjectMenu;
 
-    window.addEventListener('click', function(e) {
-      if (!e.target.closest('#projectSwitcher')) {
-        closeProjectMenu();
-      }
-    });
-
     function openCreateProjectModal() {
       closeProjectMenu();
-      const r = document.getElementById('newProjRepo'); if (r) r.value = '';
-      const n = document.getElementById('newProjName'); if (n) n.value = '';
+      const r = document.getElementById('newProjRepo'); if (r) { r.value = ''; r.style.borderColor = ''; }
+      const n = document.getElementById('newProjName'); if (n) { n.value = ''; n.style.borderColor = ''; }
       const f = document.getElementById('newProjFramework'); if (f) f.value = '';
       const m = document.getElementById('createProjectModal'); if (m) m.classList.add('active');
     }
@@ -1916,7 +1932,7 @@ export class DashboardPanel {
     function handleRepoInput(val) {
       const nameInput = document.getElementById('newProjName');
       if (!val || !nameInput) return;
-      const clean = val.trim().replace(/\\.git$/, '');
+      const clean = val.trim().replace(/\.git$/, '');
       const parts = clean.split('/');
       const repoName = parts[parts.length - 1];
       if (repoName && (!nameInput.dataset.dirty || nameInput.dataset.dirty === 'false')) {
@@ -1926,11 +1942,17 @@ export class DashboardPanel {
     window.handleRepoInput = handleRepoInput;
 
     function submitCreateProject() {
-      const gitUrl = document.getElementById('newProjRepo').value.trim();
-      const name = document.getElementById('newProjName').value.trim();
-      const framework = document.getElementById('newProjFramework').value || undefined;
+      const repoInput = document.getElementById('newProjRepo');
+      const nameInput = document.getElementById('newProjName');
+      const frameworkInput = document.getElementById('newProjFramework');
+      const gitUrl = repoInput ? repoInput.value.trim() : '';
+      const name = nameInput ? nameInput.value.trim() : '';
+      const framework = (frameworkInput && frameworkInput.value) || undefined;
       if (!name) {
-        alert('Project name is required.');
+        if (nameInput) {
+          nameInput.style.borderColor = '#ef4444';
+          nameInput.focus();
+        }
         return;
       }
       sendAction('createProject', { name: name, gitUrl: gitUrl || undefined, framework: framework });
@@ -1939,6 +1961,8 @@ export class DashboardPanel {
     window.submitCreateProject = submitCreateProject;
 
     function openAddEnvModal() {
+      const k = document.getElementById('newEnvKey'); if (k) { k.value = ''; k.style.borderColor = ''; }
+      const v = document.getElementById('newEnvValue'); if (v) { v.value = ''; v.style.borderColor = ''; }
       const m = document.getElementById('addEnvModal'); if (m) m.classList.add('active');
     }
     window.openAddEnvModal = openAddEnvModal;
@@ -1949,18 +1973,31 @@ export class DashboardPanel {
     window.closeAddEnvModal = closeAddEnvModal;
 
     function submitNewEnv() {
-      const key = document.getElementById('newEnvKey').value.trim();
-      const value = document.getElementById('newEnvValue').value.trim();
+      const keyInput = document.getElementById('newEnvKey');
+      const valInput = document.getElementById('newEnvValue');
+      const key = keyInput ? keyInput.value.trim() : '';
+      const value = valInput ? valInput.value.trim() : '';
       const targets = [];
-      if (document.getElementById('envTargetProd').checked) targets.push('production');
-      if (document.getElementById('envTargetPrev').checked) targets.push('preview');
-      if (document.getElementById('envTargetDev').checked) targets.push('development');
+      const prodCheck = document.getElementById('envTargetProd');
+      const prevCheck = document.getElementById('envTargetPrev');
+      const devCheck = document.getElementById('envTargetDev');
+      if (prodCheck && prodCheck.checked) targets.push('production');
+      if (prevCheck && prevCheck.checked) targets.push('preview');
+      if (devCheck && devCheck.checked) targets.push('development');
 
-      if (!key || !value) return;
+      if (!key) {
+        if (keyInput) { keyInput.style.borderColor = '#ef4444'; keyInput.focus(); }
+        return;
+      }
+      if (!value) {
+        if (valInput) { valInput.style.borderColor = '#ef4444'; valInput.focus(); }
+        return;
+      }
+
       sendAction('addEnv', { key: key, value: value, targets: targets });
       closeAddEnvModal();
-      document.getElementById('newEnvKey').value = '';
-      document.getElementById('newEnvValue').value = '';
+      if (keyInput) keyInput.value = '';
+      if (valInput) valInput.value = '';
 
       showDeployPrompt(key);
     }
@@ -1984,8 +2021,8 @@ export class DashboardPanel {
     window.triggerDeployFromPrompt = triggerDeployFromPrompt;
 
     function openAddDomainModal(prefill) {
-      const di = document.getElementById('newDomainInput'); if (di) di.value = prefill || '';
-      const dr = document.getElementById('newDomainRedirect'); if (dr) dr.value = '';
+      const di = document.getElementById('newDomainInput'); if (di) { di.value = prefill || ''; di.style.borderColor = ''; }
+      const dr = document.getElementById('newDomainRedirect'); if (dr) { dr.value = ''; dr.style.borderColor = ''; }
       const m = document.getElementById('addDomainModal'); if (m) m.classList.add('active');
     }
     window.openAddDomainModal = openAddDomainModal;
@@ -1996,9 +2033,14 @@ export class DashboardPanel {
     window.closeAddDomainModal = closeAddDomainModal;
 
     function submitNewDomain() {
-      const domain = document.getElementById('newDomainInput').value.trim();
-      const redirect = document.getElementById('newDomainRedirect').value.trim();
-      if (!domain) return;
+      const domInput = document.getElementById('newDomainInput');
+      const redirInput = document.getElementById('newDomainRedirect');
+      const domain = domInput ? domInput.value.trim() : '';
+      const redirect = redirInput ? redirInput.value.trim() : '';
+      if (!domain) {
+        if (domInput) { domInput.style.borderColor = '#ef4444'; domInput.focus(); }
+        return;
+      }
       sendAction('addDomain', { domain: domain, redirect: redirect || undefined });
       closeAddDomainModal();
     }
@@ -2077,10 +2119,8 @@ export class DashboardPanel {
               const item = document.createElement('button');
               const isCurrent = p.id === currentProjId;
               item.className = 'dropdown-item' + (isCurrent ? ' active' : '');
-              item.onclick = function() {
-                closeProjectMenu();
-                sendAction('linkProject', { project: p });
-              };
+              item.setAttribute('data-action', 'link-project');
+              item.setAttribute('data-project-id', p.id);
               item.innerHTML = '<span>' + escapeHtml(p.name) + '</span>' + (isCurrent ? '<span style="color: var(--vercel-cyan); font-size: 11px;">Active</span>' : '');
               dropdownList.appendChild(item);
             });
@@ -2129,7 +2169,8 @@ export class DashboardPanel {
       projects.forEach(function(p) {
         const div = document.createElement('div');
         div.className = 'project-card';
-        div.onclick = function() { sendAction('linkProject', { project: p }); };
+        div.setAttribute('data-action', 'link-project');
+        div.setAttribute('data-project-id', p.id);
         div.innerHTML = '<div>' +
           '<div class="project-card-header">' +
             '<span class="project-name">' + escapeHtml(p.name) + '</span>' +
@@ -2139,7 +2180,7 @@ export class DashboardPanel {
         '</div>' +
         '<div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">' +
           '<span style="font-size: 11px; color: var(--text-dim);">' + (p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '') + '</span>' +
-          '<button class="btn btn-primary btn-sm">Link Project →</button>' +
+          '<button class="btn btn-primary btn-sm" data-action="link-project" data-project-id="' + escapeHtml(p.id) + '">Link Project →</button>' +
         '</div>';
         grid.appendChild(div);
       });
@@ -2249,11 +2290,11 @@ export class DashboardPanel {
               const timeVal = d.created || d.createdAt;
               const dateStr = timeVal ? (new Date(timeVal).toLocaleDateString() + ' ' + new Date(timeVal).toLocaleTimeString()) : '-';
               tr.innerHTML = '<td><span class="status-pill ' + stateClass + '">' + escapeHtml(d.state || 'READY') + '</span></td>' +
-                '<td><a href="#" style="color: #fff; text-decoration: none;" onclick="openExternal(\'' + escapeHtml(d.url || '') + '\')">' + escapeHtml(d.url || '-') + ' ↗</a></td>' +
+                '<td><a href="#" style="color: #fff; text-decoration: none;" data-action="open-url" data-url="' + escapeHtml(d.url || '') + '">' + escapeHtml(d.url || '-') + ' ↗</a></td>' +
                 '<td>' + escapeHtml(commitMsg) + '</td>' +
                 '<td><span class="badge">' + escapeHtml(branch) + '</span></td>' +
                 '<td>' + dateStr + '</td>' +
-                '<td><button class="btn btn-secondary btn-sm" onclick="sendAction(\'viewLogs\', { deploymentId: \'' + escapeHtml(d.uid || d.id || '') + '\' })">Logs</button></td>';
+                '<td><button class="btn btn-secondary btn-sm" data-action="view-logs" data-deployment-id="' + escapeHtml(d.uid || d.id || '') + '">Logs</button></td>';
               depBody.appendChild(tr);
             });
           } else {
@@ -2269,8 +2310,6 @@ export class DashboardPanel {
         const domBody = document.getElementById('domainsTableBody');
         if (domBody) {
           domBody.innerHTML = '';
-          const projectDomainNames = new Set((data.domains || []).map(function(d) { return d.name; }));
-
           if (data.domains && data.domains.length) {
             data.domains.forEach(function(dom) {
               const tr = document.createElement('tr');
@@ -2278,9 +2317,9 @@ export class DashboardPanel {
                 '<td>' + (dom.apexName ? escapeHtml(dom.apexName) : '-') + '</td>' +
                 '<td><span class="status-pill ' + (dom.verified ? 'ready' : 'error') + '">' + (dom.verified ? 'VERIFIED' : 'PENDING') + '</span></td>' +
                 '<td><div style="display: flex; gap: 6px;">' +
-                  '<button class="btn btn-secondary btn-sm" onclick="sendAction(\'verifyDomain\', { domain: \'' + escapeHtml(dom.name) + '\' })">Verify</button>' +
-                  '<button class="btn btn-secondary btn-sm" onclick="openExternal(\'' + escapeHtml(dom.name) + '\')">Visit ↗</button>' +
-                  '<button class="btn btn-danger btn-sm" onclick="sendAction(\'deleteDomain\', { domain: \'' + escapeHtml(dom.name) + '\' })">Remove</button>' +
+                  '<button class="btn btn-secondary btn-sm" data-action="verify-domain" data-domain="' + escapeHtml(dom.name) + '">Verify</button>' +
+                  '<button class="btn btn-secondary btn-sm" data-action="visit-domain" data-domain="' + escapeHtml(dom.name) + '">Visit ↗</button>' +
+                  '<button class="btn btn-danger btn-sm" data-action="delete-domain" data-domain="' + escapeHtml(dom.name) + '">Remove</button>' +
                 '</div></td>';
               domBody.appendChild(tr);
             });
@@ -2307,7 +2346,7 @@ export class DashboardPanel {
                 '<td><span class="badge ' + (isAttached ? 'badge-framework' : '') + '">' + (isAttached ? 'Linked to this project' : 'Unassigned to this project') + '</span></td>' +
                 '<td>' + (isAttached
                   ? '<span style="color: var(--text-dim); font-size: 11px;">Already Linked</span>'
-                  : '<button class="btn btn-primary btn-sm" onclick="openAddDomainModal(\'' + escapeHtml(ad.name) + '\')">+ Assign to Project</button>') +
+                  : '<button class="btn btn-primary btn-sm" data-action="assign-domain" data-domain="' + escapeHtml(ad.name) + '">+ Assign to Project</button>') +
                 '</td>';
               accDomBody.appendChild(tr);
             });
@@ -2332,7 +2371,7 @@ export class DashboardPanel {
             '<td><span class="secret-text">••••••••••••</span></td>' +
             '<td><span class="badge">' + escapeHtml(targets) + '</span></td>' +
             '<td>' + (v.updatedAt ? new Date(v.updatedAt).toLocaleDateString() : '-') + '</td>' +
-            '<td><button class="btn btn-danger btn-sm" onclick="sendAction(\'deleteEnv\', { id: \'' + escapeHtml(v.id) + '\', key: \'' + escapeHtml(v.key) + '\' })">Delete</button></td>';
+            '<td><button class="btn btn-danger btn-sm" data-action="delete-env" data-env-id="' + escapeHtml(v.id) + '" data-env-key="' + escapeHtml(v.key) + '">Delete</button></td>';
           envBody.appendChild(tr);
         });
       } else {
@@ -2373,6 +2412,229 @@ export class DashboardPanel {
         container.appendChild(div);
       });
     }
+
+    function handleAction(action, el) {
+      if (!action) return;
+
+      switch (action) {
+        case 'deploy-production':
+          sendAction('deploy', { target: 'production' });
+          break;
+
+        case 'deploy-preview':
+          sendAction('deploy', { target: 'preview' });
+          break;
+
+        case 'toggle-project-menu':
+          toggleProjectMenu();
+          break;
+
+        case 'open-create-project':
+          openCreateProjectModal();
+          break;
+
+        case 'close-create-modal':
+          closeCreateProjectModal();
+          break;
+
+        case 'submit-create-project':
+          submitCreateProject();
+          break;
+
+        case 'unlink-project':
+          sendAction('unlinkProject');
+          break;
+
+        case 'open-prod-url':
+          handleProdClick();
+          break;
+
+        case 'refresh':
+          sendAction('refresh');
+          break;
+
+        case 'logout':
+          sendAction('logout');
+          break;
+
+        case 'login':
+          handleLogin();
+          break;
+
+        case 'get-token':
+          openExternal('https://vercel.com/account/tokens');
+          break;
+
+        case 'open-terminal-link':
+          sendAction('openTerminalLink');
+          break;
+
+        case 'ready':
+          sendAction('ready');
+          break;
+
+        case 'force-dashboard':
+          forceShowDashboard();
+          break;
+
+        case 'add-env-cli':
+          sendAction('addEnvCli');
+          break;
+
+        case 'pull-env':
+          sendAction('pullEnv');
+          break;
+
+        case 'open-add-env':
+          openAddEnvModal();
+          break;
+
+        case 'close-env-modal':
+          closeAddEnvModal();
+          break;
+
+        case 'submit-new-env':
+          submitNewEnv();
+          break;
+
+        case 'close-deploy-prompt':
+          closeDeployPrompt();
+          break;
+
+        case 'prompt-deploy-preview':
+          triggerDeployFromPrompt('preview');
+          break;
+
+        case 'prompt-deploy-prod':
+          triggerDeployFromPrompt('production');
+          break;
+
+        case 'open-add-domain':
+          openAddDomainModal();
+          break;
+
+        case 'close-domain-modal':
+          closeAddDomainModal();
+          break;
+
+        case 'submit-new-domain':
+          submitNewDomain();
+          break;
+
+        case 'run-diagnostics':
+          sendAction('runDiagnostics');
+          break;
+
+        case 'view-logs': {
+          const depId = el.getAttribute('data-deployment-id');
+          if (depId) sendAction('viewLogs', { deploymentId: depId });
+          break;
+        }
+
+        case 'delete-env': {
+          const id = el.getAttribute('data-env-id');
+          const key = el.getAttribute('data-env-key');
+          if (id) sendAction('deleteEnv', { id: id, key: key });
+          break;
+        }
+
+        case 'verify-domain': {
+          const domain = el.getAttribute('data-domain');
+          if (domain) sendAction('verifyDomain', { domain: domain });
+          break;
+        }
+
+        case 'visit-domain': {
+          const domain = el.getAttribute('data-domain');
+          if (domain) openExternal(domain);
+          break;
+        }
+
+        case 'delete-domain': {
+          const domain = el.getAttribute('data-domain');
+          if (domain) sendAction('deleteDomain', { domain: domain });
+          break;
+        }
+
+        case 'assign-domain': {
+          const domain = el.getAttribute('data-domain');
+          openAddDomainModal(domain);
+          break;
+        }
+
+        case 'open-url': {
+          const url = el.getAttribute('data-url');
+          if (url) openExternal(url);
+          break;
+        }
+
+        case 'link-project': {
+          const pid = el.getAttribute('data-project-id');
+          const p = allAvailableProjects.find(function(item) { return item.id === pid; });
+          if (p) {
+            closeProjectMenu();
+            sendAction('linkProject', { project: p });
+          }
+          break;
+        }
+      }
+    }
+
+    // Capture-phase Universal Click Listener
+    document.addEventListener('click', function(e) {
+      // 1. Check for tab button click
+      const tabEl = e.target.closest('.tab[data-tab]');
+      if (tabEl) {
+        e.preventDefault();
+        e.stopPropagation();
+        switchTab(tabEl.getAttribute('data-tab'));
+        return;
+      }
+
+      // 2. Check for action element click
+      const actionEl = e.target.closest('[data-action]');
+      if (actionEl) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleAction(actionEl.getAttribute('data-action'), actionEl);
+        return;
+      }
+
+      // 3. Dropdown outside click dismiss
+      if (!e.target.closest('#projectSwitcher')) {
+        closeProjectMenu();
+      }
+    }, true);
+
+    // Form inputs and filters
+    document.addEventListener('input', function(e) {
+      if (!e.target) return;
+      if (e.target.id === 'envSearchInput') {
+        filterEnvVars(e.target.value);
+      } else if (e.target.id === 'projectSearchInput') {
+        filterProjects(e.target.value);
+      } else if (e.target.id === 'newProjRepo') {
+        handleRepoInput(e.target.value);
+      }
+    });
+
+    document.addEventListener('change', function(e) {
+      if (e.target && e.target.id === 'teamSelector') {
+        handleTeamChange(e.target.value);
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        if (e.target && e.target.id === 'tokenInput') {
+          handleLogin();
+        } else if (e.target && (e.target.id === 'newEnvKey' || e.target.id === 'newEnvValue')) {
+          submitNewEnv();
+        } else if (e.target && (e.target.id === 'newDomainInput' || e.target.id === 'newDomainRedirect')) {
+          submitNewDomain();
+        }
+      }
+    });
 
     // Message listener for host extension communications
     window.addEventListener('message', function(event) {
