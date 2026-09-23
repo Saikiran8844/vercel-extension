@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/saikiran-n.vercel-control-center?label=Marketplace&logo=visual-studio-code&color=0070f3" alt="Marketplace" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/saikiran-n.vercel?label=Marketplace&logo=visual-studio-code&color=0070f3" alt="Marketplace" />
   </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/saikiran-n.vercel-control-center?logo=visual-studio-code" alt="Installs" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/saikiran-n.vercel?logo=visual-studio-code" alt="Installs" />
   </a>
   <a href="https://github.com/Saikiran8844/vercel-extension">
     <img src="https://img.shields.io/badge/GitHub-Repository-181717?logo=github" alt="GitHub" />
@@ -41,7 +41,7 @@ Search for **`Vercel Console`** in the Extensions view (`Ctrl + Shift + X` / `Cm
 ext install saikiran-n.vercel-control-center
 ```
 
-Or get it directly from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center).
+Or get it directly from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel).
 
 ---
 
