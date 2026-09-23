@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { VercelClient } from '../api/vercelClient';
 import { TokenManager } from '../auth/tokenManager';
 import { VercelCliRunner } from '../cli/vercelCli';
-import { WorkspaceProjectConfig } from '../types/extension';
+import { WorkspaceProjectConfig, VercelTreeItem } from '../types/extension';
 
 export function registerEnvCommands(
   context: vscode.ExtensionContext,
@@ -95,11 +95,14 @@ export function registerEnvCommands(
     })
   );
 
-  // Add Environment Variable
+  // Add Environment Variable (UI Wizard)
   context.subscriptions.push(
-    vscode.commands.registerCommand('vercel.addEnv', async () => {
+    vscode.commands.registerCommand('vercel.addEnv', async (item?: VercelTreeItem) => {
       const config = getProjectConfig();
-      if (!config) return;
+      if (!config) {
+        vscode.window.showErrorMessage('Workspace is not linked to a Vercel project.');
+        return;
+      }
 
       const key = await vscode.window.showInputBox({
         title: 'Variable Key',
@@ -115,11 +118,16 @@ export function registerEnvCommands(
       });
       if (value === undefined) return;
 
+      let defaultTarget: string | undefined = undefined;
+      if (item?.data && typeof item.data === 'object' && 'env' in item.data) {
+        defaultTarget = (item.data as { env: string }).env;
+      }
+
       const targets = await vscode.window.showQuickPick(
         [
-          { label: 'Production', picked: true, target: 'production' },
-          { label: 'Preview', picked: true, target: 'preview' },
-          { label: 'Development', picked: true, target: 'development' }
+          { label: 'Production', picked: !defaultTarget || defaultTarget === 'production', target: 'production' },
+          { label: 'Preview', picked: !defaultTarget || defaultTarget === 'preview', target: 'preview' },
+          { label: 'Development', picked: !defaultTarget || defaultTarget === 'development', target: 'development' }
         ],
         { canPickMany: true, placeHolder: 'Select targets' }
       );
@@ -133,11 +141,52 @@ export function registerEnvCommands(
           target: targets.map((t) => t.target as 'production' | 'preview' | 'development')
         });
 
-        vscode.window.showInformationMessage(`Added variable '${key}' successfully!`);
         onRefresh();
+
+        const deployChoice = await vscode.window.showInformationMessage(
+          `Added environment variable '${key}' successfully! Deploy now to apply changes?`,
+          'Deploy to Production',
+          'Deploy to Preview',
+          'Later'
+        );
+        if (deployChoice === 'Deploy to Production') {
+          vscode.commands.executeCommand('vercel.deployProd');
+        } else if (deployChoice === 'Deploy to Preview') {
+          vscode.commands.executeCommand('vercel.deployPreview');
+        }
       } catch (err) {
         vscode.window.showErrorMessage(`Failed to add variable: ${(err as Error).message}`);
       }
+    })
+  );
+
+  // Add Environment Variable (CLI / Terminal)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vercel.addEnvCli', async (item?: VercelTreeItem) => {
+      const config = getProjectConfig();
+      const root = config?.rootPath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!root) {
+        vscode.window.showErrorMessage('No workspace folder open.');
+        return;
+      }
+
+      let envTarget = '';
+      if (item?.data && typeof item.data === 'object' && 'env' in item.data) {
+        envTarget = ` ${(item.data as { env: string }).env}`;
+      }
+
+      const terminal = vscode.window.createTerminal({
+        name: 'Vercel CLI (env add)',
+        cwd: root
+      });
+      terminal.show();
+
+      const token = await tokenManager.getAccessToken();
+      const tokenFlag = token ? ` --token ${token}` : '';
+      const activeTeamId = tokenManager.getActiveTeamId();
+      const teamFlag = activeTeamId ? ` --scope ${activeTeamId}` : '';
+
+      terminal.sendText(`vercel env add${envTarget}${teamFlag}${tokenFlag}`);
     })
   );
 }

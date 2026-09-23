@@ -14,6 +14,23 @@ export class DomainService {
     return res.domains || [];
   }
 
+  public async listAllAccountDomains(): Promise<VercelDomain[]> {
+    try {
+      const res = await this.client.request<{ domains?: VercelDomain[] } | VercelDomain[]>(
+        '/v5/domains',
+        {
+          cacheTtlSeconds: 60
+        }
+      );
+      if (Array.isArray(res)) {
+        return res;
+      }
+      return (res as { domains?: VercelDomain[] })?.domains || [];
+    } catch {
+      return [];
+    }
+  }
+
   public async addDomain(
     projectId: string,
     domain: string,

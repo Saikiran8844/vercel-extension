@@ -199,8 +199,15 @@
       },
       {
         "command": "vercel.addEnv",
-        "title": "Vercel: Add Environment Variable",
-        "category": "Vercel"
+        "title": "Vercel: Add Environment Variable (UI)",
+        "category": "Vercel",
+        "icon": "$(plus)"
+      },
+      {
+        "command": "vercel.addEnvCli",
+        "title": "Vercel: Add Environment Variable (CLI)",
+        "category": "Vercel",
+        "icon": "$(terminal)"
       },
       {
         "command": "vercel.manageDomains",
@@ -262,17 +269,65 @@
     "menus": {
       "view/title": [
         {
+          "command": "vercel.addEnv",
+          "when": "view == vercel.environments",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vercel.addEnvCli",
+          "when": "view == vercel.environments",
+          "group": "navigation@2"
+        },
+        {
           "command": "vercel.openDashboardPanel",
           "when": "view =~ /^vercel\\./",
-          "group": "navigation@1"
+          "group": "navigation@3"
         },
         {
           "command": "vercel.refresh",
           "when": "view =~ /^vercel\\./",
-          "group": "navigation@2"
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vercel.addEnv",
+          "when": "view == vercel.environments && viewItem == category",
+          "group": "inline@1"
+        },
+        {
+          "command": "vercel.addEnvCli",
+          "when": "view == vercel.environments && viewItem == category",
+          "group": "inline@2"
+        },
+        {
+          "command": "vercel.addEnv",
+          "when": "view == vercel.environments && viewItem == category",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "vercel.addEnvCli",
+          "when": "view == vercel.environments && viewItem == category",
+          "group": "1_modification@2"
+        },
+        {
+          "command": "vercel.pullEnv",
+          "when": "view == vercel.environments",
+          "group": "2_operations@1"
+        },
+        {
+          "command": "vercel.compareEnv",
+          "when": "view == vercel.environments",
+          "group": "2_operations@2"
         }
       ],
       "commandPalette": [
+        {
+          "command": "vercel.addEnv"
+        },
+        {
+          "command": "vercel.addEnvCli"
+        },
         {
           "command": "vercel.openDashboardPanel"
         },

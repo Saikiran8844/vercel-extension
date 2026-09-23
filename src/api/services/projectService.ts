@@ -35,4 +35,21 @@ export class ProjectService {
     this.client.invalidateCache('/v9/projects');
     return res;
   }
+
+  public async createProject(params: {
+    name: string;
+    framework?: string | null | undefined;
+    gitRepository?: {
+      type: string;
+      repo: string;
+    } | undefined;
+    rootDirectory?: string | null | undefined;
+  }): Promise<VercelProject> {
+    const res = await this.client.request<VercelProject>('/v9/projects', {
+      method: 'POST',
+      body: params
+    });
+    this.client.invalidateCache('/v9/projects');
+    return res;
+  }
 }
