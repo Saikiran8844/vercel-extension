@@ -20,7 +20,7 @@ export interface RequestOptions {
 export class BaseApiClient {
   private cache = new MemoryCache();
   private inFlightQueue = 0;
-  private maxConcurrent = 5;
+  private maxConcurrent = 15;
   private queueWaiters: Array<() => void> = [];
 
   constructor(
@@ -185,6 +185,10 @@ export class BaseApiClient {
           });
         }
       );
+
+      req.setTimeout(8000, () => {
+        req.destroy(new VercelApiError(408, `Request to ${url.pathname} timed out after 8000ms`));
+      });
 
       req.on('error', (err) => {
         reject(new VercelApiError(500, `Network error: ${err.message}`));
