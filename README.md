@@ -1,25 +1,19 @@
-# Vercel Console for Visual Studio Code
+# Vercel Console
 
 <p align="center">
-  <img src="media/icon.png" width="128" height="128" alt="Vercel Console Icon" />
+  <img src="media/icon.png" width="96" height="96" alt="Vercel Console" />
 </p>
 
 <p align="center">
-  <strong>Production-grade Vercel management, interactive dashboard, deployments, environment variables, domains, live logs, and AI diagnostics directly inside VS Code.</strong>
+  Manage your Vercel projects, deployments, logs, and environment variables directly inside VS Code — without constantly switching back and forth to your browser.
 </p>
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/saikiran-n.vercel-control-center?label=Marketplace&logo=visual-studio-code&color=0070f3" alt="Visual Studio Marketplace Version" />
+    <img src="https://img.shields.io/visual-studio-marketplace/v/saikiran-n.vercel-control-center?label=Marketplace&logo=visual-studio-code&color=0070f3" alt="Marketplace" />
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/saikiran-n.vercel-control-center?logo=visual-studio-code&color=10b981" alt="Installs" />
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center">
-    <img src="https://img.shields.io/visual-studio-marketplace/r/saikiran-n.vercel-control-center?color=f5a623" alt="Rating" />
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+    <img src="https://img.shields.io/visual-studio-marketplace/i/saikiran-n.vercel-control-center?logo=visual-studio-code" alt="Installs" />
   </a>
   <a href="https://github.com/Saikiran8844/vercel-extension">
     <img src="https://img.shields.io/badge/GitHub-Repository-181717?logo=github" alt="GitHub" />
@@ -28,143 +22,102 @@
 
 ---
 
-## 📥 Installation
+## Why this exists
 
-Available now on the **Visual Studio Code Marketplace**!
+If you build on Vercel, your daily workflow usually involves:
+- Pushing a commit, then opening Chrome to wait for the build to finish.
+- Copying environment variables between the dashboard and your `.env.local`.
+- Wondering why a preview build failed and digging through web logs to find the line.
 
-### Method 1: VS Code Quick Open
-Press `Ctrl + P` (or `Cmd + P` on macOS) and run:
+**Vercel Console** puts the dashboard inside VS Code so you can stay in your editor and keep coding.
+
+---
+
+## Install
+
+Search for **`Vercel Console`** in the Extensions view (`Ctrl + Shift + X` / `Cmd + Shift + X`), or run:
+
 ```bash
 ext install saikiran-n.vercel-control-center
 ```
 
-### Method 2: Extensions View
-1. Open VS Code and open the Extensions view (`Ctrl + Shift + X` / `Cmd + Shift + X`).
-2. Search for **`Vercel Console`** (or **`saikiran-n.vercel-control-center`**).
-3. Click **Install**.
-
-### Method 3: Web Marketplace
-Install directly from the [Visual Studio Marketplace Listing](https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center).
+Or get it directly from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=saikiran-n.vercel-control-center).
 
 ---
 
-## ⚡ What is Vercel Console?
+## What you can do
 
-**Vercel Console** brings the complete Vercel developer experience into Visual Studio Code. Monitor live deployments, inspect real-time logs, manage encrypted environment variables, assign custom domains, audit configuration drift, and trigger instant builds without ever switching windows.
+### 1. The Dashboard (`Ctrl+Shift+P` → `Vercel: Open Control Center Dashboard`)
+A clean dashboard designed to feel like Vercel's web interface:
+- **Live Status**: See if production or preview is building, ready, or failed with real-time indicators.
+- **Instant Deploys**: Deploy to preview or production with one click.
+- **Deployments Tab**: Browse build history, view commit details, and read logs without opening a browser.
+- **Environment Variables**: Add, delete, and inspect variables across Production, Preview, and Development. It even asks if you want to deploy right after adding one so your runtime actually gets the update.
+- **Domains & DNS**: Check DNS verification status, visit domains, or hook up domains already attached to your account.
+- **Project Switching & Git Import**: Switch between connected projects or spin up a new project straight from a Git repository.
 
-> **Note**: This is an open-source community extension designed for developers using Vercel. It is not officially affiliated with or endorsed by Vercel Inc.
+### 2. Sidebar Explorer
+Click the Vercel triangle in your activity bar to see:
+- Current linked project and framework.
+- Recent deployments with status icons.
+- Masked environment variables with quick pull-to-local options.
+- Team and scope switcher.
 
----
-
-## 🚀 Key Highlights
-
-### 🖥️ 1. Interactive Control Center Dashboard
-A native, high-performance webview interface styled with Vercel's signature dark aesthetic:
-- **Instant Project Overview**: Real-time production status indicator, live deployment URLs, commit hashes, active branch, and deployment age.
-- **Tabbed Navigation**:
-  - **Overview**: Live production card and project metadata with zero-delay instant rendering.
-  - **Deployments**: Chronological deployment history with status pills, commit messages, and one-click build log inspection.
-  - **Environment Variables**: View encrypted variable keys, masked values, assigned targets (`Production`, `Preview`, `Development`), and delete variables with immediate deployment prompts.
-  - **Domains & DNS**: Project domain verification status, apex records, direct links, and account-wide domain assignment.
-  - **AI Diagnostics**: Deep health checks scanning for build anomalies, misconfigurations, and environment drift.
-- **Project Switcher & Git Importer**: Switch between connected projects on the fly, or import a repository directly from GitHub, GitLab, or Bitbucket.
-
----
-
-### 🌲 2. Activity Bar Tree Views
-Dedicated Vercel explorer in your VS Code side panel featuring:
-- **Current Project**: Active project state, framework, and linked workspace path.
-- **Deployments**: Grouped by target environment with real-time status badges, rollback, redeploy, and cancel controls.
-- **Environment Variables**: Masked values (`••••••••`), CLI push/pull synchronization, and environment comparison diffing.
-- **Domains & DNS**: SSL validation, DNS verification status, and one-click diagnostic checks.
-- **All Projects & Teams**: Multi-tenant team switcher with instant project search.
-- **Platform Services**: Observability into Vercel Blob, Queues, AI Gateway, WAF managed rules, and BotID.
+### 3. Build Diagnostics & Drift Detection
+- Compares your local config (`vercel.json`, root folder, framework) with your remote Vercel settings so you don't get surprises after pushing.
+- Optional AI error explanation for build failures (powered by your choice of Gemini, OpenAI, or Claude).
+- Your secrets and tokens are never leaked — everything is scrubbed before analysis.
 
 ---
 
-### 🔍 3. AI & Deterministic Diagnostics
-- **Drift Detection**: Compares local workspace configuration (`vercel.json`, root directory, framework settings) against the remote Vercel cloud project to catch configuration divergence before deploying.
-- **AI Build Error Diagnosis**: Automatically parses build and runtime failure logs using Gemini, OpenAI, or Anthropic to suggest precise, actionable code and configuration fixes.
-- **Credential Sanitization**: Strictly sanitizes logs and environment payloads before diagnosis to prevent token or secret leakage.
+## Getting Started (1 minute)
+
+1. Open the dashboard via the sidebar icon or run **`Vercel: Open Control Center Dashboard`** in the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+2. Paste your Vercel Access Token ([generate one here](https://vercel.com/account/tokens) if you don't have one handy).
+3. If your workspace already has a `.vercel/project.json`, it links automatically. If not, pick a project from the list or link one.
+
+That's it. Your token is stored safely in VS Code's encrypted secret vault, not in any config file.
 
 ---
 
-### 🛡️ 4. Zero Token Leakage Security
-- Authentication credentials and Personal Access Tokens are securely stored in VS Code's encrypted native `SecretStorage`.
-- Secrets and tokens are **never** stored in plaintext, workspace files, or `settings.json`.
+## Useful Shortcuts & Commands
+
+| Command | What it does |
+| :--- | :--- |
+| `Vercel: Open Control Center Dashboard` | Opens the full visual dashboard tab |
+| `Vercel: Deploy Production` | Deploys active workspace directly to production |
+| `Vercel: Deploy Preview` | Creates an isolated preview deployment |
+| `Vercel: Pull Environment Variables` | Pulls your remote env vars down to `.env.local` |
+| `Vercel: Rollback Production` | Reverts production to an earlier working build |
+| `Vercel: Switch Team / Scope` | Switch between your personal account and team accounts |
+| `Vercel: Detect Configuration Drift` | Checks if local settings match cloud settings |
+| `Vercel: Logout` | Clears stored token and resets extension state |
 
 ---
 
-## 🛠️ Getting Started in 3 Steps
+## Settings
 
-1. **Open the Control Center**:
-   - Click the **Vercel** icon in the Activity Bar.
-   - Or press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS) and run `Vercel: Open Control Center Dashboard`.
-2. **Connect your Account**:
-   - Click **Connect Account** and enter your Vercel Personal Access Token ([Generate a Token here](https://vercel.com/account/tokens)).
-3. **Link your Workspace**:
-   - Pick any existing project from your account or import a new one from Git.
+You can tweak how the extension behaves in your VS Code settings (`Ctrl+,` → search `Vercel`):
+
+- **`vercel.autoRefresh`**: Automatically poll for deployment updates (default: `true`).
+- **`vercel.refreshInterval`**: How often to check for updates in seconds (default: `30`).
+- **`vercel.ai.provider`**: Which provider to use for error explanation (`gemini`, `openai`, `anthropic`).
 
 ---
 
-## ⌨️ Command Palette Reference
+## Contributing
 
-| Command | Identifier | Description |
-| :--- | :--- | :--- |
-| **Vercel: Open Control Center Dashboard** | `vercel.openDashboardPanel` | Opens the full interactive webview dashboard |
-| **Vercel: Login** | `vercel.login` | Securely store your Vercel Access Token |
-| **Vercel: Logout** | `vercel.logout` | Remove saved credentials and reset session |
-| **Vercel: Switch Team / Scope** | `vercel.switchAccount` | Switch between Personal account and Teams |
-| **Vercel: Deploy** | `vercel.deploy` | Trigger a new deployment for the workspace |
-| **Vercel: Deploy Preview** | `vercel.deployPreview` | Deploy preview build with isolated URL |
-| **Vercel: Deploy Production** | `vercel.deployProd` | Deploy directly to the live production domain |
-| **Vercel: Deploy Dry Run** | `vercel.deployDryRun` | Preview files, ignore rules, and payload size |
-| **Vercel: Rollback Production** | `vercel.rollback` | Instantly revert production to a previous deployment |
-| **Vercel: Pull Environment Variables** | `vercel.pullEnv` | Download remote cloud environment variables to `.env.local` |
-| **Vercel: Compare Environments** | `vercel.compareEnvironments` | Diff variables across Preview and Production |
-| **Vercel: Diagnose Deployment** | `vercel.diagnoseDeployment` | Run automated build failure & runtime diagnosis |
-| **Vercel: Detect Configuration Drift** | `vercel.detectDrift` | Audit local workspace vs cloud settings |
-
----
-
-## ⚙️ Configuration Settings
-
-Customize behavior via VS Code Settings (`Ctrl+,` / `Cmd+,` → search `Vercel`):
-
-| Setting | Default | Description |
-| :--- | :--- | :--- |
-| `vercel.autoRefresh` | `true` | Automatically sync deployment and project status |
-| `vercel.refreshInterval` | `30` | Polling interval in seconds for background refreshes |
-| `vercel.showNotifications` | `"important"` | Notification filter level (`all`, `important`, `none`) |
-| `vercel.ai.enabled` | `true` | Enable intelligent AI diagnosis for build errors |
-| `vercel.ai.provider` | `"gemini"` | AI model provider (`gemini`, `openai`, `anthropic`) |
-| `vercel.dashboardUrl` | `"https://vercel.com"` | Base URL used for dashboard and external links |
-| `vercel.enableTelemetry` | `false` | Anonymous extension performance telemetry |
-
----
-
-## 🤝 Contributing & Development
+Found a bug or have an idea? Issues and PRs are welcome on [GitHub](https://github.com/Saikiran8844/vercel-extension).
 
 ```bash
-# Clone the repository
 git clone https://github.com/Saikiran8844/vercel-extension.git
 cd vercel-extension
-
-# Install dependencies
 npm install
-
-# Run TypeScript compilation
-npm run compile
-
-# Run tests
-npm test
-
-# Build production bundle
 npm run build
 ```
 
 ---
 
-## 📄 License
+## Disclaimer
 
-Distributed under the [MIT License](LICENSE).
+This is an independent community project and is not affiliated with, maintained, or endorsed by Vercel Inc.
